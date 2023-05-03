@@ -20,7 +20,7 @@ document.body.appendChild(renderer.domElement);
 
 // animation
 
-function animation(time) {
+function animation(time: number) {
 
   mesh.rotation.x = time / 2000;
   mesh.rotation.y = time / 1000;
