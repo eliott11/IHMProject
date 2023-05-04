@@ -1,4 +1,7 @@
 import * as THREE from 'three';
+import {
+  GLTFLoader
+} from 'three/addons/loaders/GLTFLoader.js';
 
 let alpha, beta, gamma = 0;
 
@@ -26,9 +29,10 @@ function click() {
 
 click();
 
-const degToRad = (deg) => deg * (Math.PI / 180);
+const degToRad = (deg) => deg * (Math.PI / 280);
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer();
@@ -37,64 +41,114 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshNormalMaterial({
-  color: 0x00ff00
-});
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+camera.position.z = 100;
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 
-camera.position.z = 5;
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+directionalLight.position.set(1, 1, 1);
+scene.add(directionalLight);
+
+const loader = new GLTFLoader();
+loader.load(
+  'maze.gltf',
+  function (gltf) {
+
+    const object = gltf.scene.children[0];
+
+    object.material = new THREE.MeshStandardMaterial({
+      color: 0xff0000 // Rouge
+    });
+
+    object.scale.set(0.7, 0.7, 0.7);
+
+    object.rotation.x = -0.99;
+    object.rotation.y = 0.5;
+
+    scene.add(object);
+
+    window.addEventListener('devicemotion', function (event) {
+      const acceleration = event.accelerationIncludingGravity;
+
+      if (acceleration.x > 15 || acceleration.y > 15 || acceleration.z > 15) {
+        const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+        object.material.color.set('#' + randomColor);
+      }
+    });
+  },
+  function (xhr) {
+    console.log((xhr.loaded / xhr.total * 100) + '% chargé');
+  },
+  function (error) {
+    console.error('Erreur de chargement', error);
+  }
+);
 
 function animate() {
 
-  cube.rotation.z = degToRad(alpha) / 2;
-  cube.rotation.x = degToRad(beta);
-  cube.rotation.y = degToRad(gamma);
+  scene.rotation.z = degToRad(alpha) / 2;
+  scene.rotation.x = degToRad(beta);
+  scene.rotation.y = degToRad(gamma);
 
   renderer.render(scene, camera);
 }
 
-// var px = 50; // Position x and y
-// var py = 50;
-// var vx = 0.0; // Velocity x and y
-// var vy = 0.0;
-// var updateRate = 1 / 60; // Sensor refresh rate
+animate();
 
-// function getAccel() {
-//   DeviceMotionEvent.requestPermission().then(response => {
-//     if (response == 'granted') {
-//       // Add a listener to get smartphone orientation
-//       // in the alpha-beta-gamma axes (units in degrees)
-//       window.addEventListener('deviceorientation', (event) => {
-//         // Expose each orientation angle in a more readable way
-//         rotation_degrees = event.alpha;
-//         frontToBack_degrees = event.beta;
-//         leftToRight_degrees = event.gamma;
 
-//         // Update velocity according to how tilted the phone is
-//         // Since phones are narrower than they are long, double the increase to the x velocity
-//         vx = vx + leftToRight_degrees * updateRate * 2;
-//         vy = vy + frontToBack_degrees * updateRate;
+// import * as THREE from 'three';
 
-//         // Update position and clip it to bounds
-//         px = px + vx * .5;
-//         if (px > 98 || px < 0) {
-//           px = Math.max(0, Math.min(98, px)) // Clip px between 0-98
-//           vx = 0;
+// let alpha, beta, gamma = 0;
+
+// function click() {
+//   if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+//     DeviceOrientationEvent.requestPermission()
+//       .then(permissionState => {
+//         if (permissionState === 'granted') {
+//           window.addEventListener('deviceorientation', (event) => {
+//             alpha = event.alpha;
+//             beta = event.beta;
+//             gamma = event.gamma;
+//           });
 //         }
+//       })
+//       .catch(console.error);
+//   } else {
+//     window.addEventListener('deviceorientation', (event) => {
+//       alpha = event.alpha;
+//       beta = event.beta;
+//       gamma = event.gamma;
+//     });
+//   }
+// }
 
-//         py = py + vy * .5;
-//         if (py > 98 || py < 0) {
-//           py = Math.max(0, Math.min(98, py)) // Clip py between 0-98
-//           vy = 0;
-//         }
+// click();
 
-//         dot = document.getElementsByClassName("indicatorDot")[0]
-//         dot.setAttribute('style', "left:" + (px) + "%;" +
-//           "top:" + (py) + "%;");
+// const degToRad = (deg) => deg * (Math.PI / 180);
 
-//       });
-//     }
-//   });
+// const scene = new THREE.Scene();
+// const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+// const renderer = new THREE.WebGLRenderer();
+// renderer.setSize(window.innerWidth, window.innerHeight);
+
+// renderer.setAnimationLoop(animate);
+// document.body.appendChild(renderer.domElement);
+
+// const geometry = new THREE.BoxGeometry(1, 1, 1);
+// const material = new THREE.MeshNormalMaterial({
+//   color: 0x00ff00
+// });
+// const cube = new THREE.Mesh(geometry, material);
+// scene.add(cube);
+
+// camera.position.z = 5;
+
+// function animate() {
+
+//   cube.rotation.z = degToRad(alpha) / 2;
+//   cube.rotation.x = degToRad(beta);
+//   cube.rotation.y = degToRad(gamma);
+
+//   renderer.render(scene, camera);
 // }
