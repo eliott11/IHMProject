@@ -31,5 +31,16 @@ body {
   min-height: 100vh;
 }
 
+.indicatorDot {
+  width: 30px;
+  height: 30px;
+  background-color: #ffab56;
+  border-radius: 50%;
+  position: fixed;
+}
+
+ body {
+  margin: 0;
+}
 
 
